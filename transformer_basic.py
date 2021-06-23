@@ -10,8 +10,6 @@ def scaled_dot_product_attention(query: Tensor, key: Tensor, value: Tensor) -> T
     softmax = F.softmax(temp / scale, dim=-1)
     return softmax.bmm(value)
 
-
-
 class AttentionHead(nn.Module):
     def __init__(self, dim_in: int, dim_k: int, dim_v: int):
         super().__init__()
@@ -31,8 +29,10 @@ class MultiHeadAttention(nn.Module):
         self.linear = nn.Linear(num_heads * dim_v, dim_in)
 
     def forward(self, query: Tensor, key: Tensor, value: Tensor) -> Tensor:
+        attn_cat = torch.cat([h(query, key, value) for h in self.heads], dim=-1)
+        print(attn_cat.shape)
         return self.linear(
-            torch.cat([h(query, key, value) for h in self.heads], dim=-1)
+            attn_cat
         )    
         
 def position_encoding(
